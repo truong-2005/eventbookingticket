@@ -1,0 +1,70 @@
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import StatCard from '../../../components/admin/StatCard';
+import RevenueChart from '../../../components/admin/RevenueChart';
+import TopEventsChart from '../../../components/admin/TopEventsChart';
+import dashboardApi from '../../../api/dashboardApi';
+
+const StaffDashboardPage = () => {
+  const { data, isLoading } = useQuery({
+    queryKey: ['staffDashboardData'],
+    queryFn: async () => {
+      const [summaryRes, revenueRes, topEventsRes] = await Promise.all([
+        dashboardApi.getSummary(),
+        dashboardApi.getRevenue(),
+        dashboardApi.getTopEvents()
+      ]);
+      return {
+        summary: summaryRes.data,
+        revenue: revenueRes.data || [],
+        topEvents: topEventsRes.data || []
+      };
+    }
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  const { summary, revenue, topEvents } = data || {};
+
+  return (
+    <div>
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-gray-900">Tổng quan hiệu suất</h1>
+      </div>
+
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 mb-8">
+        <StatCard 
+          title="Sự kiện đang quản lý" 
+          value={summary?.totalEvents || 0} 
+          color="blue"
+          icon={<svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>}
+        />
+        <StatCard 
+          title="Tổng Vé Đã Bán" 
+          value={summary?.totalBookings || 0} 
+          color="yellow"
+          icon={<svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg>}
+        />
+        <StatCard 
+          title="Doanh thu tạo ra" 
+          value={(summary?.totalRevenue || 0).toLocaleString() + ' ₫'} 
+          color="green"
+          icon={<svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <RevenueChart data={revenue || []} />
+        <TopEventsChart data={topEvents || []} />
+      </div>
+    </div>
+  );
+};
+
+export default StaffDashboardPage;
