@@ -25,11 +25,11 @@ const StaffLayout = () => {
 
   return (
     <StaffToastContext.Provider value={toast}>
-      <div className="min-h-screen bg-slate-50 flex overflow-hidden">
+      <div className="h-screen bg-slate-50 flex overflow-hidden">
         <StaffSidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
           <StaffHeader toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
-          <main className="flex-1 overflow-y-auto p-4 lg:p-8 admin-scroll">
+          <main className="flex-1 overflow-y-auto p-4 lg:p-8 admin-scroll bg-slate-50">
             <Outlet />
           </main>
         </div>

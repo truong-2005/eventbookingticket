@@ -40,7 +40,11 @@ const UserEditPage = () => {
   });
 
   const onSubmit = (formData) => {
-    updateMutation.mutate(formData);
+    const payload = {
+      ...formData,
+      phone: formData.phone === '' ? null : formData.phone,
+    };
+    updateMutation.mutate(payload);
   };
 
   if (isFetching) return <div className="text-center p-10">Đang tải...</div>;

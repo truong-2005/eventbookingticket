@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import { ROUTES } from '../../constants/routes';
 import useAuth from '../../hooks/useAuth';
 
-const StaffSidebar = () => {
+const StaffSidebar = ({ isOpen, setIsOpen }) => {
   const { logout } = useAuth();
   
   const navItems = [
@@ -14,10 +14,23 @@ const StaffSidebar = () => {
   ];
 
   return (
-    <div className="flex flex-col w-64 bg-slate-800 h-full text-white">
-      <div className="flex items-center justify-center h-16 bg-slate-900 border-b border-slate-700">
-        <span className="text-xl font-bold uppercase tracking-wider text-blue-400">Staff Portal</span>
-      </div>
+    <>
+      {/* Mobile overlay */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 z-20 bg-black bg-opacity-50 lg:hidden"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+      <div className={`fixed inset-y-0 left-0 z-30 flex flex-col w-64 bg-slate-900 h-full text-white transform transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="flex items-center justify-between h-16 bg-slate-950 border-b border-slate-800 px-4">
+          <span className="text-xl font-bold uppercase tracking-wider text-indigo-400 w-full text-center">Staff Portal</span>
+          <button onClick={() => setIsOpen(false)} className="lg:hidden text-gray-400 hover:text-white">
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
       <div className="flex-1 overflow-y-auto">
         <nav className="px-2 py-4 space-y-1">
           {navItems.map((item) => (
@@ -26,7 +39,7 @@ const StaffSidebar = () => {
               to={item.path}
               className={({ isActive }) => 
                 `group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                  isActive ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-slate-700 hover:text-white'
+                  isActive ? 'bg-indigo-600 text-white' : 'text-gray-300 hover:bg-slate-800 hover:text-white'
                 }`
               }
             >
@@ -38,7 +51,7 @@ const StaffSidebar = () => {
           ))}
         </nav>
       </div>
-      <div className="flex-shrink-0 flex bg-slate-900 p-4 border-t border-slate-700">
+      <div className="flex-shrink-0 flex bg-slate-950 p-4 border-t border-slate-800 pb-8 lg:pb-4">
         <button onClick={logout} className="flex-shrink-0 w-full group block text-gray-300 hover:text-white transition">
           <div className="flex items-center">
             <svg className="inline-block h-6 w-6 text-gray-400 group-hover:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -49,6 +62,7 @@ const StaffSidebar = () => {
         </button>
       </div>
     </div>
+    </>
   );
 };
 

@@ -2,10 +2,20 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import Input from '../common/Input';
 import Button from '../common/Button';
+import { useQuery } from '@tanstack/react-query';
+import roleApi from '../../api/roleApi';
 
 const UserForm = ({ initialData, onSubmit, isLoading, isEdit = false, submitText = 'Lưu' }) => {
+  const { data: rolesData } = useQuery({
+    queryKey: ['roles'],
+    queryFn: async () => {
+      const res = await roleApi.getAllRoles();
+      return res.data;
+    }
+  });
+
   const { register, handleSubmit, formState: { errors } } = useForm({
-    values: initialData
+    values: initialData ? { ...initialData, roleNames: initialData.roles || [] } : undefined
   });
 
   return (
@@ -52,6 +62,26 @@ const UserForm = ({ initialData, onSubmit, isLoading, isEdit = false, submitText
         label="Số điện thoại" 
         {...register('phone')}
       />
+
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700 mb-1">Vai trò</label>
+        <div className="flex flex-wrap gap-4">
+          {rolesData?.map((role) => (
+            <label key={role.id} className="inline-flex items-center">
+              <input
+                type="checkbox"
+                value={role.name}
+                {...register('roleNames', { required: 'Vui lòng chọn ít nhất 1 vai trò' })}
+                className="form-checkbox h-4 w-4 text-indigo-600 rounded border-gray-300"
+              />
+              <span className="ml-2 text-sm text-gray-700">{role.name}</span>
+            </label>
+          ))}
+        </div>
+        {errors.roleNames && (
+          <p className="text-red-500 text-sm mt-1">{errors.roleNames.message}</p>
+        )}
+      </div>
       
       {isEdit && (
         <>

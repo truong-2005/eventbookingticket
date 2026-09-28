@@ -53,7 +53,7 @@ const AdminRoleEditPage = lazy(() => import('./pages/admin/roles/RoleEditPage'))
 const StaffLoginPage = lazy(() => import('./pages/staff/auth/LoginPage'));
 
 // ─── Staff Pages ──────────────────────────────────────────────────────────────
-const StaffDashboardPage = lazy(() => import('./pages/staff/StaffDashboardPage'));
+const StaffDashboardPage = lazy(() => import('./pages/staff/dashboard/StaffDashboardPage'));
 const StaffEventManagementPage = lazy(() => import('./pages/staff/events/EventManagementPage'));
 const StaffEventCreatePage = lazy(() => import('./pages/staff/events/EventCreatePage'));
 const StaffEventEditPage = lazy(() => import('./pages/staff/events/EventEditPage'));

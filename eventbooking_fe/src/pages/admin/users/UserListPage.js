@@ -70,6 +70,18 @@ const UserListPage = () => {
     { header: 'Họ và tên', field: 'fullName' },
     { header: 'Email', field: 'email' },
     { 
+      header: 'Vai trò', 
+      render: (row) => (
+        <div className="flex flex-wrap gap-1">
+          {row.roles?.map(role => (
+            <span key={role} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">
+              {role}
+            </span>
+          ))}
+        </div>
+      )
+    },
+    { 
       header: 'Trạng thái', 
       render: (row) => (
         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${row.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
@@ -107,7 +119,7 @@ const UserListPage = () => {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Quản lý Người dùng</h1>
-        <Button onClick={() => navigate(ROUTES.ADMIN_USERS_CREATE)}>
+        <Button onClick={() => navigate(ROUTES.ADMIN_USER_CREATE)}>
           + Thêm người dùng
         </Button>
       </div>

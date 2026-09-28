@@ -19,7 +19,12 @@ const UserCreatePage = () => {
   });
 
   const onSubmit = (formData) => {
-    createMutation.mutate(formData);
+    const payload = {
+      ...formData,
+      phone: formData.phone === '' ? null : formData.phone,
+      roleNames: Array.isArray(formData.roleNames) ? formData.roleNames : [formData.roleNames].filter(Boolean)
+    };
+    createMutation.mutate(payload);
   };
 
   return (
