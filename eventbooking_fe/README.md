@@ -1,70 +1,91 @@
-# Getting Started with Create React App
+# EventBooking Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Ứng dụng web đặt vé sự kiện của EventBooking. Frontend cung cấp giao diện cho khách hàng, nhân viên và quản trị viên; dữ liệu được lấy từ REST API của backend.
 
-## Available Scripts
+## Chức năng
 
-In the project directory, you can run:
+- Khách hàng: đăng ký, đăng nhập, xem sự kiện, đặt vé, xem vé đã đặt và quản lý hồ sơ.
+- Thanh toán VNPay mô phỏng và hiển thị vé điện tử có mã QR.
+- Nhân viên: quản lý sự kiện, danh mục, đơn đặt vé và quét mã vé để check-in.
+- Quản trị viên: quản lý sự kiện, danh mục, đơn đặt vé, người dùng, vai trò và xem thống kê.
+- Giao diện phân quyền theo tài khoản; các API cần đăng nhập gửi access token tự động.
 
-### `npm start`
+## Công nghệ
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- React 19 và Create React App
+- React Router
+- TanStack Query và Axios
+- Tailwind CSS
+- Chart.js, React Hook Form và React Hot Toast
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Yêu cầu
 
-### `npm test`
+- Node.js và npm
+- Backend EventBooking đang chạy tại `http://localhost:8080`
+- MySQL được cấu hình và đang chạy cho backend
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Cài đặt và chạy
 
-### `npm run build`
+```bash
+# Clone repository frontend từ GitHub rồi chuyển vào thư mục dự án
+cd eventbooking_fe
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+npm ci
+npm start
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Mở [http://localhost:3000](http://localhost:3000) trên trình duyệt. Để frontend gọi backend ở địa chỉ khác, sửa `BASE_URL` trong `src/api/axiosClient.js` rồi khởi động lại frontend.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Lệnh thường dùng
 
-### `npm run eject`
+```bash
+npm start       # Chạy môi trường phát triển
+npm run build   # Tạo bản build production trong thư mục build/
+npm test        # Chạy test của Create React App
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Các đường dẫn chính
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+| Đường dẫn | Mục đích |
+| --- | --- |
+| `/` | Trang chủ |
+| `/events` | Danh sách sự kiện |
+| `/events/:id` | Chi tiết sự kiện |
+| `/events/:id/book` | Đặt vé (cần đăng nhập) |
+| `/my-tickets` | Vé của tôi |
+| `/login`, `/register` | Đăng nhập và đăng ký khách hàng |
+| `/staff/login` | Đăng nhập nhân viên |
+| `/admin/login` | Đăng nhập quản trị viên |
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Các trang quản trị và nhân viên yêu cầu tài khoản có đúng vai trò. Xem danh sách route đầy đủ trong `src/constants/routes.js`.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Cấu hình API
 
-## Learn More
+Địa chỉ backend hiện được đặt trực tiếp trong `src/api/axiosClient.js`:
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```js
+const BASE_URL = 'http://localhost:8080';
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Axios tự gửi access token và làm mới token khi API trả về lỗi xác thực phù hợp. Nếu đổi cổng hoặc tên miền backend, cập nhật địa chỉ này trước khi chạy frontend.
 
-### Code Splitting
+## Thanh toán mô phỏng
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+Cấu hình phát triển của backend chuyển đến trang `/mock-vnpay` trên frontend. Đây là luồng demo để thử giao diện và trạng thái đơn; không thực hiện chuyển tiền thật.
 
-### Analyzing the Bundle Size
+## Cấu trúc thư mục
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+```text
+src/
+├── api/          # Các hàm gọi REST API
+├── components/   # Thành phần giao diện dùng lại
+├── context/      # Trạng thái dùng chung, gồm xác thực
+├── layouts/      # Bố cục client, staff và admin
+├── pages/        # Các trang theo vai trò
+├── hooks/        # React hooks dùng lại
+└── utils/        # Hàm tiện ích
+```
 
-### Making a Progressive Web App
+## Làm việc cùng backend
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Khởi động backend trước hoặc đồng thời với frontend. Hướng dẫn cài đặt backend nằm trong README của repository backend. Mặc định frontend gọi `http://localhost:8080`.
