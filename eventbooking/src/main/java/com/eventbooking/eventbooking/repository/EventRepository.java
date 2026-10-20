@@ -6,6 +6,8 @@ import com.eventbooking.eventbooking.enums.EventStatus;
 import jakarta.persistence.LockModeType;
 
 import java.util.Optional;
+import java.util.Collection;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +31,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
                        Pageable pageable);
 
     // Trang chủ: chỉ sự kiện sắp diễn ra còn bán vé
+    List<Event> findByStatusIn(Collection<EventStatus> statuses);
     Page<Event> findByStatusOrderByEventDateAsc(EventStatus status, Pageable pageable);
 
     Page<Event> findByCategoryId(Long categoryId, Pageable pageable);

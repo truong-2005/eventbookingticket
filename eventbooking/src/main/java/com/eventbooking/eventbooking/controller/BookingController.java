@@ -6,7 +6,6 @@ import com.eventbooking.eventbooking.service.BookingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -19,10 +18,13 @@ import jakarta.servlet.http.HttpServletRequest;
 @Tag(name = "Booking", description = "Đặt vé và quản lý vé")
 @RestController
 @RequestMapping("/api/bookings")
-@RequiredArgsConstructor
 public class BookingController {
 
     private final BookingService bookingService;
+
+    public BookingController(BookingService bookingService) {
+        this.bookingService = bookingService;
+    }
 
     // ===== NGƯỜI DÙNG ĐÃ ĐĂNG NHẬP =====
 
@@ -39,10 +41,16 @@ public class BookingController {
         return ResponseEntity.ok(bookingService.getMyBookings(pageable));
     }
 
+    @Operation(summary = "Người dùng hủy vé và hoàn tiền mô phỏng")
+    @PatchMapping("/{id}/cancel")
+    public ResponseEntity<BookingResponse> cancelMyBooking(@PathVariable Long id) {
+        return ResponseEntity.ok(bookingService.cancelMyBooking(id));
+    }
+
     // ===== ADMIN =====
 
     @Operation(summary = "Danh sách tất cả vé (lọc theo status)")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     @GetMapping
     public ResponseEntity<Page<BookingResponse>> findAll(
             @RequestParam(required = false) BookingStatus status,
@@ -51,21 +59,21 @@ public class BookingController {
     }
 
     @Operation(summary = "Chi tiết vé theo id")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     @GetMapping("/{id}")
     public ResponseEntity<BookingResponse> findById(@PathVariable Long id) {
         return ResponseEntity.ok(bookingService.findById(id));
     }
 
     @Operation(summary = "Tra vé theo mã booking")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     @GetMapping("/code/{code}")
     public ResponseEntity<BookingResponse> findByCode(@PathVariable String code) {
         return ResponseEntity.ok(bookingService.findByCode(code));
     }
 
     @Operation(summary = "Danh sách vé của một sự kiện")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     @GetMapping("/event/{eventId}")
     public ResponseEntity<Page<BookingResponse>> findByEvent(
             @PathVariable Long eventId,
@@ -74,7 +82,7 @@ public class BookingController {
     }
 
     @Operation(summary = "Đổi trạng thái vé (hủy → hoàn vé về sự kiện)")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     @PatchMapping("/{id}/status")
     public ResponseEntity<BookingResponse> updateStatus(@PathVariable Long id,
                                                         @RequestParam BookingStatus status) {
@@ -82,7 +90,7 @@ public class BookingController {
     }
 
     @Operation(summary = "Xóa vé")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         bookingService.delete(id);

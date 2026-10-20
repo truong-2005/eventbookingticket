@@ -2,7 +2,6 @@ package com.eventbooking.eventbooking.service;
 
 import com.eventbooking.eventbooking.config.VNPayConfig;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -12,7 +11,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
-@RequiredArgsConstructor
 public class VNPayService {
 
     @Value("${vnpay.tmnCode}")

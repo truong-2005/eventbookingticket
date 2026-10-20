@@ -37,7 +37,8 @@ const StaffEventCreatePage = () => {
       endTime: formData.endTime ? format(formData.endTime, "yyyy-MM-dd'T'HH:mm:ss") : null,
       ticketPrice: parseFloat(formData.price),
       totalTickets: parseInt(formData.totalTickets),
-      categoryId: parseInt(formData.categoryId)
+      categoryId: parseInt(formData.categoryId),
+      imageUrl: formData.imageUrl
     };
     createMutation.mutate(payload);
   };

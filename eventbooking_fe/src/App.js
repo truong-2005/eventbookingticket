@@ -24,6 +24,8 @@ const ClientEventDetailPage = lazy(() => import('./pages/client/events/EventDeta
 const CreateBookingPage = lazy(() => import('./pages/client/bookings/CreateBookingPage'));
 const MyTicketsPage = lazy(() => import('./pages/client/bookings/MyTicketsPage'));
 const ClientBookingDetailPage = lazy(() => import('./pages/client/bookings/BookingDetailPage'));
+const MockVNPayPage = lazy(() => import('./pages/client/payments/MockVNPayPage'));
+const PaymentReturnPage = lazy(() => import('./pages/client/payments/PaymentReturnPage'));
 const ProfilePage = lazy(() => import('./pages/client/profile/ProfilePage'));
 const ChangePasswordPage = lazy(() => import('./pages/client/profile/ChangePasswordPage'));
 
@@ -85,6 +87,8 @@ function App() {
               <Route path={ROUTES.HOME} element={<HomePage />} />
               <Route path={ROUTES.EVENTS} element={<ClientEventListPage />} />
               <Route path={ROUTES.EVENT_DETAIL} element={<ClientEventDetailPage />} />
+              <Route path={ROUTES.MOCK_VNPAY} element={<MockVNPayPage />} />
+              <Route path={ROUTES.PAYMENT_RETURN} element={<PaymentReturnPage />} />
 
               {/* Protected: Customer */}
               <Route element={<ProtectedRoute allowedRoles={['CUSTOMER', 'ADMIN', 'STAFF']} />}>

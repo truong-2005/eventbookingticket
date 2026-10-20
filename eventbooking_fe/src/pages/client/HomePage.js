@@ -5,6 +5,7 @@ import eventApi from '../../api/eventApi';
 import HighlightEventCard from '../../components/client/HighlightEventCard';
 import Button from '../../components/common/Button';
 import { ROUTES } from '../../constants/routes';
+import useActiveEvents from '../../hooks/useActiveEvents';
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -14,8 +15,10 @@ const HomePage = () => {
     queryFn: async () => {
       const res = await eventApi.getAllEvents({ size: 8, status: 'UPCOMING' });
       return res.data.content || [];
-    }
+    },
+    refetchInterval: 30_000
   });
+  const activeUpcomingEvents = useActiveEvents(upcomingEvents);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -79,9 +82,9 @@ const HomePage = () => {
           <div className="flex justify-center py-20">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
           </div>
-        ) : upcomingEvents.length > 0 ? (
+        ) : activeUpcomingEvents.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {upcomingEvents.map(event => (
+            {activeUpcomingEvents.map(event => (
               <HighlightEventCard key={event.id} event={event} />
             ))}
           </div>

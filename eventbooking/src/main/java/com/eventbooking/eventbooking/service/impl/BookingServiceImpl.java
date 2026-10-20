@@ -4,6 +4,7 @@ import com.eventbooking.eventbooking.dto.booking.*;
 import com.eventbooking.eventbooking.entity.*;
 import com.eventbooking.eventbooking.enums.BookingStatus;
 import com.eventbooking.eventbooking.enums.EventStatus;
+import com.eventbooking.eventbooking.enums.PaymentStatus;
 import com.eventbooking.eventbooking.exception.*;
 import com.eventbooking.eventbooking.mapper.BookingMapper;
 import com.eventbooking.eventbooking.repository.BookingRepository;
@@ -12,7 +13,6 @@ import com.eventbooking.eventbooking.repository.UserRepository;
 import com.eventbooking.eventbooking.service.BookingService;
 import com.eventbooking.eventbooking.util.BookingCodeGenerator;
 import com.eventbooking.eventbooking.util.DateTimeUtil;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,7 +25,6 @@ import com.eventbooking.eventbooking.service.VNPayService;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class BookingServiceImpl implements BookingService {
 
@@ -34,6 +33,14 @@ public class BookingServiceImpl implements BookingService {
     private final UserRepository userRepository;
     private final BookingMapper bookingMapper;
     private final VNPayService vnPayService;
+
+    public BookingServiceImpl(BookingRepository bookingRepository, EventRepository eventRepository, UserRepository userRepository, BookingMapper bookingMapper, VNPayService vnPayService) {
+        this.bookingRepository = bookingRepository;
+        this.eventRepository = eventRepository;
+        this.userRepository = userRepository;
+        this.bookingMapper = bookingMapper;
+        this.vnPayService = vnPayService;
+    }
 
     // ===== ĐẶT VÉ (nguyên tử: khóa row event, trừ vé, sinh mã) =====
     @Override
@@ -51,10 +58,21 @@ public class BookingServiceImpl implements BookingService {
             throw new BookingException("Sự kiện đã bắt đầu, không thể đặt vé");
         if (request.quantity() == null || request.quantity() < 1)
             throw new BookingException("Số lượng vé phải lớn hơn 0");
+        // Release reservations left behind by failed payments before checking stock or duplicates.
+        var failedBookings = bookingRepository.findByUserIdAndEventIdAndStatusAndPaymentStatus(
+                user.getId(), event.getId(), BookingStatus.CONFIRMED, PaymentStatus.FAILED);
+        for (Booking failedBooking : failedBookings) {
+            event.setAvailableTickets(Math.min(
+                    event.getTotalTickets(),
+                    event.getAvailableTickets() + failedBooking.getQuantity()));
+            failedBooking.setStatus(BookingStatus.CANCELLED);
+            bookingRepository.save(failedBooking);
+        }
+
         if (event.getAvailableTickets() < request.quantity())
             throw new BookingException("Không đủ vé, chỉ còn " + event.getAvailableTickets() + " vé");
-        if (bookingRepository.existsByUserIdAndEventIdAndStatus(
-                user.getId(), event.getId(), BookingStatus.CONFIRMED))
+        if (bookingRepository.existsByUserIdAndEventIdAndStatusAndPaymentStatusIn(
+                user.getId(), event.getId(), BookingStatus.CONFIRMED, java.util.List.of(PaymentStatus.PENDING, PaymentStatus.PAID)))
             throw new BookingException("Bạn đã đặt vé cho sự kiện này rồi");
 
         // Sinh mã vé — lặp đến khi không trùng
@@ -86,6 +104,30 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional
+    public BookingResponse failPayment(String bookingCode) {
+        Booking booking = bookingRepository.findByBookingCodeForUpdate(bookingCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Vé", "bookingCode", bookingCode));
+
+        if (booking.getPaymentStatus() == PaymentStatus.PAID
+                || booking.getPaymentStatus() == PaymentStatus.REFUNDED) {
+            return bookingMapper.toResponse(booking);
+        }
+
+        if (booking.getStatus() == BookingStatus.CONFIRMED) {
+            Event event = eventRepository.findByIdForUpdate(booking.getEvent().getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Sự kiện", "id", booking.getEvent().getId()));
+            event.setAvailableTickets(Math.min(
+                    event.getTotalTickets(),
+                    event.getAvailableTickets() + booking.getQuantity()));
+            booking.setStatus(BookingStatus.CANCELLED);
+        }
+
+        booking.setPaymentStatus(PaymentStatus.FAILED);
+        return bookingMapper.toResponse(bookingRepository.save(booking));
+    }
+
+    @Override
     public BookingResponse findById(Long id) {
         return bookingMapper.toResponse(getBooking(id));
     }
@@ -100,6 +142,17 @@ public class BookingServiceImpl implements BookingService {
     public Page<BookingResponse> getMyBookings(Pageable pageable) {
         return bookingRepository.findByUserId(getCurrentUser().getId(), pageable)
                 .map(bookingMapper::toResponse);
+    }
+
+    @Override
+    @Transactional
+    public BookingResponse cancelMyBooking(Long id) {
+        Booking booking = getBookingForUpdate(id);
+        User currentUser = getCurrentUser();
+        if (booking.getUser() == null || !booking.getUser().getId().equals(currentUser.getId())) {
+            throw new ResourceNotFoundException("Vé", "id", id);
+        }
+        return cancelBooking(booking);
     }
 
     @Override
@@ -119,20 +172,39 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingResponse updateStatus(Long id, BookingStatus status) {
-        Booking booking = getBooking(id);
-
         if (status == BookingStatus.CANCELLED) {
-            if (booking.getStatus() == BookingStatus.CANCELLED)
-                throw new BookingException("Vé này đã bị hủy trước đó");
-            if (DateTimeUtil.hasStarted(booking.getEvent().getEventDate()))
-                throw new BookingException("Sự kiện đã bắt đầu, không thể hủy vé");
-            booking.setStatus(BookingStatus.CANCELLED);
-            // Hoàn vé về event
-            Event event = booking.getEvent();
-            event.setAvailableTickets(event.getAvailableTickets() + booking.getQuantity());
-        } else {
-            booking.setStatus(status);
+            return cancelBooking(getBookingForUpdate(id));
         }
+
+        Booking booking = getBooking(id);
+        booking.setStatus(status);
+        return bookingMapper.toResponse(bookingRepository.save(booking));
+    }
+
+    private BookingResponse cancelBooking(Booking booking) {
+        if (booking.getStatus() == BookingStatus.CANCELLED) {
+            throw new BookingException("Vé này đã bị hủy trước đó");
+        }
+        if (booking.getStatus() != BookingStatus.CONFIRMED) {
+            throw new BookingException("Chỉ có thể hủy vé đã xác nhận");
+        }
+        if (DateTimeUtil.hasStarted(booking.getEvent().getEventDate())) {
+            throw new BookingException("Sự kiện đã bắt đầu, không thể hủy vé");
+        }
+
+        Event event = eventRepository.findByIdForUpdate(booking.getEvent().getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Sự kiện", "id", booking.getEvent().getId()));
+        event.setAvailableTickets(Math.min(
+                event.getTotalTickets(),
+                event.getAvailableTickets() + booking.getQuantity()));
+        booking.setStatus(BookingStatus.CANCELLED);
+
+        if (booking.getPaymentStatus() == PaymentStatus.PAID) {
+            booking.setPaymentStatus(PaymentStatus.REFUNDED);
+        } else if (booking.getPaymentStatus() == PaymentStatus.PENDING) {
+            booking.setPaymentStatus(PaymentStatus.FAILED);
+        }
+
         return bookingMapper.toResponse(bookingRepository.save(booking));
     }
 
@@ -145,6 +217,11 @@ public class BookingServiceImpl implements BookingService {
 
     private Booking getBooking(Long id) {
         return bookingRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Vé", "id", id));
+    }
+
+    private Booking getBookingForUpdate(Long id) {
+        return bookingRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Vé", "id", id));
     }
 

@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "password_reset_tokens")
 @Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
 @Builder
 public class PasswordResetToken {
 
@@ -32,4 +31,16 @@ public class PasswordResetToken {
 
     @CreationTimestamp
     private LocalDateTime createdAt;
+
+    public PasswordResetToken() {
+    }
+
+    public PasswordResetToken(Long id, String token, User user, LocalDateTime expiryDate, boolean used, LocalDateTime createdAt) {
+        this.id = id;
+        this.token = token;
+        this.user = user;
+        this.expiryDate = expiryDate;
+        this.used = used;
+        this.createdAt = createdAt;
+    }
 }

@@ -1,6 +1,5 @@
 package com.eventbooking.eventbooking.dto.user;
 
-import com.eventbooking.eventbooking.enums.UserStatus;
 import jakarta.validation.constraints.*;
 
 import java.util.Set;

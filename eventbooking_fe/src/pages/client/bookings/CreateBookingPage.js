@@ -7,15 +7,19 @@ import bookingApi from '../../../api/bookingApi';
 import { formatCurrency } from '../../../utils/formatCurrency';
 import Button from '../../../components/common/Button';
 import { ROUTES } from '../../../constants/routes';
+import useAuth from '../../../hooks/useAuth';
 
 const CreateBookingPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm({
     defaultValues: {
       quantity: 1,
-      paymentMethod: 'VNPAY'
+      paymentMethod: 'VNPAY',
+      customerName: user?.fullName || user?.username || '',
+      customerEmail: user?.email || ''
     }
   });
 
@@ -26,7 +30,8 @@ const CreateBookingPage = () => {
     queryFn: async () => {
       const response = await eventApi.getEventById(id);
       return response.data;
-    }
+    },
+    refetchInterval: 30_000
   });
 
   const bookingMutation = useMutation({
@@ -44,8 +49,8 @@ const CreateBookingPage = () => {
     bookingMutation.mutate({
       eventId: parseInt(id, 10),
       quantity: parseInt(formData.quantity, 10),
-      customerName: formData.customerName,
-      customerEmail: formData.customerEmail,
+      customerName: user?.fullName || user?.username || formData.customerName,
+      customerEmail: user?.email || formData.customerEmail,
       paymentMethod: formData.paymentMethod
     });
   };
@@ -71,6 +76,7 @@ const CreateBookingPage = () => {
   }
 
   const totalPrice = event.ticketPrice * parseInt(quantity, 10);
+  const canBook = event.status === 'UPCOMING';
 
   return (
     <div className="bg-gray-50 min-h-screen py-12">
@@ -104,6 +110,7 @@ const CreateBookingPage = () => {
             <h3 className="text-lg leading-6 font-medium text-gray-900">Chi tiết đơn hàng</h3>
           </div>
           <div className="px-4 py-5 sm:p-6 space-y-6">
+            {!canBook && <div className="bg-amber-50 text-amber-800 p-4 rounded-md">Sự kiện đã bắt đầu hoặc kết thúc, hiện không thể đặt vé.</div>}
             {bookingMutation.isError && <div className="bg-red-50 text-red-500 p-4 rounded-md">{bookingMutation.error?.response?.data?.message || 'Có lỗi xảy ra khi đặt vé. Vui lòng thử lại.'}</div>}
             
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -114,8 +121,9 @@ const CreateBookingPage = () => {
                     type="text"
                     id="customerName"
                     {...register('customerName', { required: 'Vui lòng nhập họ tên' })}
+                    readOnly={Boolean(user?.fullName || user?.username)}
                     className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border"
-                    placeholder="Nhập họ và tên người đi"
+                    placeholder="Lấy từ tài khoản đã đăng nhập"
                   />
                   {errors.customerName && <p className="mt-1 text-sm text-red-600">{errors.customerName.message}</p>}
                 </div>
@@ -128,8 +136,9 @@ const CreateBookingPage = () => {
                     type="email"
                     id="customerEmail"
                     {...register('customerEmail', { required: 'Vui lòng nhập email', pattern: { value: /^\S+@\S+$/i, message: 'Email không hợp lệ' } })}
+                    readOnly={Boolean(user?.email)}
                     className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border"
-                    placeholder="Nhập địa chỉ email"
+                    placeholder="Lấy từ tài khoản đã đăng nhập"
                   />
                   {errors.customerEmail && <p className="mt-1 text-sm text-red-600">{errors.customerEmail.message}</p>}
                 </div>
@@ -192,8 +201,8 @@ const CreateBookingPage = () => {
               
               <div className="flex justify-end space-x-4">
                 <Button variant="secondary" type="button" onClick={() => navigate(-1)}>Quay lại</Button>
-                <Button type="submit" variant="primary" isLoading={bookingMutation.isPending}>
-                  Tiến hành Đặt Vé
+                <Button type="submit" variant="primary" isLoading={bookingMutation.isPending} disabled={!canBook}>
+                  {canBook ? 'Tiến hành Đặt Vé' : 'Không thể đặt vé'}
                 </Button>
               </div>
             </form>

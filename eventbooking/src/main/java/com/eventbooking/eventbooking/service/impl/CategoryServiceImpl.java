@@ -7,19 +7,23 @@ import com.eventbooking.eventbooking.mapper.CategoryMapper;
 import com.eventbooking.eventbooking.repository.CategoryRepository;
 import com.eventbooking.eventbooking.repository.EventRepository;
 import com.eventbooking.eventbooking.service.CategoryService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final EventRepository eventRepository;
     private final CategoryMapper categoryMapper;
+
+    public CategoryServiceImpl(CategoryRepository categoryRepository, EventRepository eventRepository, CategoryMapper categoryMapper) {
+        this.categoryRepository = categoryRepository;
+        this.eventRepository = eventRepository;
+        this.categoryMapper = categoryMapper;
+    }
 
     @Override
     @Transactional

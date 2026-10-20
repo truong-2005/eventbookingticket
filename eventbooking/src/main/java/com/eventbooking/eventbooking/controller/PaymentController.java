@@ -2,14 +2,16 @@ package com.eventbooking.eventbooking.controller;
 
 import com.eventbooking.eventbooking.config.VNPayConfig;
 import com.eventbooking.eventbooking.entity.Booking;
+import com.eventbooking.eventbooking.enums.BookingStatus;
 import com.eventbooking.eventbooking.enums.PaymentStatus;
 import com.eventbooking.eventbooking.repository.BookingRepository;
+import com.eventbooking.eventbooking.service.BookingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,14 +26,20 @@ import java.util.Map;
 @Tag(name = "Payment", description = "Xử lý thanh toán VNPay")
 @RestController
 @RequestMapping("/api/payments")
-@RequiredArgsConstructor
 public class PaymentController {
 
     private final BookingRepository bookingRepository;
+    private final BookingService bookingService;
+
+    public PaymentController(BookingRepository bookingRepository, BookingService bookingService) {
+        this.bookingRepository = bookingRepository;
+        this.bookingService = bookingService;
+    }
 
     @Value("${vnpay.hashSecret}")
     private String vnp_HashSecret;
 
+    @Transactional
     @Operation(summary = "VNPay IPN / Return URL callback")
     @GetMapping("/vnpay-return")
     public ResponseEntity<?> vnpayReturn(HttpServletRequest request) {
@@ -59,17 +67,23 @@ public class PaymentController {
             String responseCode = request.getParameter("vnp_ResponseCode");
             String transactionNo = request.getParameter("vnp_TransactionNo");
 
-            Booking booking = bookingRepository.findByBookingCode(txnRef).orElse(null);
+            Booking booking = bookingRepository.findByBookingCodeForUpdate(txnRef).orElse(null);
             if (booking != null) {
                 if ("00".equals(responseCode)) {
+                    if (booking.getStatus() == BookingStatus.CANCELLED) {
+                        booking.setPaymentStatus(PaymentStatus.REFUNDED);
+                        booking.setTransactionId(transactionNo);
+                        booking.setPaymentDate(LocalDateTime.now());
+                        bookingRepository.save(booking);
+                        return ResponseEntity.ok(Map.of("message", "Vé đã hủy; hoàn tiền mô phỏng đã được ghi nhận"));
+                    }
                     booking.setPaymentStatus(PaymentStatus.PAID);
                     booking.setTransactionId(transactionNo);
                     booking.setPaymentDate(LocalDateTime.now());
                     bookingRepository.save(booking);
                     return ResponseEntity.ok(Map.of("message", "Thanh toán thành công"));
                 } else {
-                    booking.setPaymentStatus(PaymentStatus.FAILED);
-                    bookingRepository.save(booking);
+                    bookingService.failPayment(txnRef);
                     return ResponseEntity.badRequest().body(Map.of("message", "Thanh toán thất bại"));
                 }
             } else {

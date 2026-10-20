@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import EventCard from '../../../components/client/EventCard';
 import Pagination from '../../../components/common/Pagination';
 import eventApi from '../../../api/eventApi';
+import useActiveEvents from '../../../hooks/useActiveEvents';
 
 const EventListPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -19,7 +20,8 @@ const EventListPage = () => {
       const res = await eventApi.getAllEvents(params);
       return res.data;
     },
-    keepPreviousData: true
+    keepPreviousData: true,
+    refetchInterval: 30_000
   });
 
   const handleSearch = (e) => {
@@ -41,7 +43,7 @@ const EventListPage = () => {
     setSearchParams(searchParams);
   };
 
-  const events = data?.content || [];
+  const events = useActiveEvents(data?.content || []);
   const pageable = data?.pageable || { pageNumber: currentPage };
   const totalPages = data?.totalPages || 0;
 
@@ -82,19 +84,11 @@ const EventListPage = () => {
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           </div>
         ) : events.length > 0 ? (
-          <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
-              {events.map(event => (
-                <EventCard key={event.id} event={event} />
-              ))}
-            </div>
-            
-            <Pagination 
-              pageable={pageable} 
-              totalPages={totalPages} 
-              onPageChange={handlePageChange} 
-            />
-          </>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
+            {events.map(event => (
+              <EventCard key={event.id} event={event} />
+            ))}
+          </div>
         ) : (
           <div className="bg-white rounded-lg shadow p-12 text-center text-gray-500">
             <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -103,6 +97,14 @@ const EventListPage = () => {
             <h3 className="text-lg font-medium text-gray-900 mb-1">Không tìm thấy sự kiện nào</h3>
             <p>Vui lòng thử lại với từ khóa khác.</p>
           </div>
+        )}
+
+        {!isLoading && totalPages > 1 && (
+          <Pagination
+            pageable={pageable}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
         )}
       </div>
     </div>

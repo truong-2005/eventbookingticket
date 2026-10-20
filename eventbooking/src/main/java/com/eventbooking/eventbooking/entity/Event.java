@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "events")
 @Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
 @Builder
 public class Event {
 
@@ -65,4 +64,24 @@ public class Event {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    public Event() {
+    }
+
+    public Event(Long id, String title, String description, String imageUrl, Category category, String location, LocalDateTime eventDate, LocalDateTime endTime, BigDecimal ticketPrice, Integer totalTickets, Integer availableTickets, EventStatus status, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.imageUrl = imageUrl;
+        this.category = category;
+        this.location = location;
+        this.eventDate = eventDate;
+        this.endTime = endTime;
+        this.ticketPrice = ticketPrice;
+        this.totalTickets = totalTickets;
+        this.availableTickets = availableTickets;
+        this.status = status;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
 }

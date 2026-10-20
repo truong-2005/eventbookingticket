@@ -10,7 +10,6 @@ import com.eventbooking.eventbooking.repository.BookingRepository;
 import com.eventbooking.eventbooking.repository.EventRepository;
 import com.eventbooking.eventbooking.repository.CategoryRepository;
 import com.eventbooking.eventbooking.service.EventService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class EventServiceImpl implements com.eventbooking.eventbooking.service.EventService {
 
@@ -27,6 +25,13 @@ public class EventServiceImpl implements com.eventbooking.eventbooking.service.E
     private final CategoryRepository categoryRepository;
     private final BookingRepository bookingRepository;
     private final EventMapper eventMapper;
+
+    public EventServiceImpl(EventRepository eventRepository, CategoryRepository categoryRepository, BookingRepository bookingRepository, EventMapper eventMapper) {
+        this.eventRepository = eventRepository;
+        this.categoryRepository = categoryRepository;
+        this.bookingRepository = bookingRepository;
+        this.eventMapper = eventMapper;
+    }
 
     @Override
     @Transactional

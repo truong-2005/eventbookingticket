@@ -3,7 +3,6 @@ package com.eventbooking.eventbooking.security;
 import com.eventbooking.eventbooking.entity.User;
 import com.eventbooking.eventbooking.enums.UserStatus;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,10 +11,13 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 @Getter
-@RequiredArgsConstructor
 public class CustomUserDetails implements UserDetails {
 
     private final User user;   // entity User của project
+
+    public CustomUserDetails(User user) {
+        this.user = user;
+    }
 
     /** ROLE_ADMIN, ROLE_STAFF, ROLE_CUSTOMER — dùng cho @PreAuthorize("hasRole('ADMIN')") */
     @Override

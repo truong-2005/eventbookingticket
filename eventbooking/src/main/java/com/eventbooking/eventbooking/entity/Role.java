@@ -6,7 +6,6 @@ import lombok.*;
 @Entity
 @Table(name = "roles")
 @Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
 @Builder
 public class Role {
 
@@ -18,4 +17,13 @@ public class Role {
     private String name;          // ADMIN, STAFF, CUSTOMER, etc.
 
     private String description;
+
+    public Role() {
+    }
+
+    public Role(Long id, String name, String description) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+    }
 }

@@ -11,7 +11,6 @@ import com.eventbooking.eventbooking.repository.UserRepository;
 import com.eventbooking.eventbooking.service.RefreshTokenService;
 import com.eventbooking.eventbooking.service.RoleService;
 import com.eventbooking.eventbooking.service.UserService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,7 +24,6 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
@@ -33,6 +31,14 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final RefreshTokenService refreshTokenService;
+
+    public UserServiceImpl(UserRepository userRepository, RoleService roleService, UserMapper userMapper, PasswordEncoder passwordEncoder, RefreshTokenService refreshTokenService) {
+        this.userRepository = userRepository;
+        this.roleService = roleService;
+        this.userMapper = userMapper;
+        this.passwordEncoder = passwordEncoder;
+        this.refreshTokenService = refreshTokenService;
+    }
 
     // ===== CRUD =====
 

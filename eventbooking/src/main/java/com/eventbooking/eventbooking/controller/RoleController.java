@@ -4,7 +4,6 @@ import com.eventbooking.eventbooking.dto.role.*;
 import com.eventbooking.eventbooking.service.RoleService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,11 +14,14 @@ import java.util.List;
 @Tag(name = "Role", description = "Quản lý vai trò")
 @RestController
 @RequestMapping("/api/roles")
-@PreAuthorize("hasRole('ADMIN')")
-@RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
 public class RoleController {
 
     private final RoleService roleService;
+
+    public RoleController(RoleService roleService) {
+        this.roleService = roleService;
+    }
 
     @PostMapping
     public ResponseEntity<RoleResponse> create(@Valid @RequestBody RoleRequest request) {

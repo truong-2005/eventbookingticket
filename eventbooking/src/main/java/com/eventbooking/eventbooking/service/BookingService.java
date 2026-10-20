@@ -9,9 +9,11 @@ import jakarta.servlet.http.HttpServletRequest;
 
 public interface BookingService {
     BookingResponse create(CreateBookingRequest request, HttpServletRequest httpRequest);              // trừ vé trong transaction
+    BookingResponse failPayment(String bookingCode);
     BookingResponse findById(Long id);
     BookingResponse findByCode(String bookingCode);
     Page<BookingResponse> getMyBookings(Pageable pageable);            // vé của tôi
+    BookingResponse cancelMyBooking(Long id);
     Page<BookingResponse> findByEvent(Long eventId, Pageable pageable);
     Page<BookingResponse> findAll(BookingStatus status, Pageable pageable);
     BookingResponse updateStatus(Long id, BookingStatus status);       // hủy → hoàn vé

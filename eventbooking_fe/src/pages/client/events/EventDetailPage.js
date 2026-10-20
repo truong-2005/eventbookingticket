@@ -18,7 +18,8 @@ const EventDetailPage = () => {
     queryFn: async () => {
       const response = await eventApi.getEventById(id);
       return response.data;
-    }
+    },
+    refetchInterval: 30_000
   });
 
   const handleBookTicket = () => {

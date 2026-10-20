@@ -11,9 +11,17 @@ const bookingApi = {
     return axiosClient.get('/api/bookings/my', { params });
   },
 
+  cancelMyBooking: (id) => {
+    return axiosClient.patch(`/api/bookings/${id}/cancel`);
+  },
+
   // Xác minh thanh toán VNPay
   verifyPayment: (queryString) => {
     return axiosClient.get(`/api/payments/vnpay-return${queryString}`);
+  },
+
+  generateMockPaymentReturnUrl: (params) => {
+    return axiosClient.post('/api/mock-vnpay/generate-return-url', params);
   },
 
   // Tra cứu vé theo mã

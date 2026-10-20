@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "bookings")
 @Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
 @Builder
 public class Booking {
 
@@ -66,4 +65,24 @@ public class Booking {
 
     @CreationTimestamp
     private LocalDateTime createdAt;
+
+    public Booking() {
+    }
+
+    public Booking(Long id, String bookingCode, User user, Event event, String customerName, String customerEmail, Integer quantity, BigDecimal totalAmount, BookingStatus status, PaymentMethod paymentMethod, PaymentStatus paymentStatus, String transactionId, LocalDateTime paymentDate, LocalDateTime createdAt) {
+        this.id = id;
+        this.bookingCode = bookingCode;
+        this.user = user;
+        this.event = event;
+        this.customerName = customerName;
+        this.customerEmail = customerEmail;
+        this.quantity = quantity;
+        this.totalAmount = totalAmount;
+        this.status = status;
+        this.paymentMethod = paymentMethod;
+        this.paymentStatus = paymentStatus;
+        this.transactionId = transactionId;
+        this.paymentDate = paymentDate;
+        this.createdAt = createdAt;
+    }
 }

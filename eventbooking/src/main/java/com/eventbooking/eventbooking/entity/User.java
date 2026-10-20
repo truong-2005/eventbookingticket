@@ -14,7 +14,6 @@ import java.util.Set;
 @Entity
 @Table(name = "users")
 @Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
 @Builder
 public class User {
 
@@ -52,4 +51,20 @@ public class User {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    public User() {
+    }
+
+    public User(Long id, String username, String email, String password, String fullName, String phone, UserStatus status, Set<Role> roles, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.fullName = fullName;
+        this.phone = phone;
+        this.status = status;
+        this.roles = roles;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
 }

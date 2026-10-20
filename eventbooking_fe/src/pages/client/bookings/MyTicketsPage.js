@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import bookingApi from '../../../api/bookingApi';
 import TicketCard from '../../../components/client/TicketCard';
 import Pagination from '../../../components/common/Pagination';
@@ -8,6 +8,7 @@ import Pagination from '../../../components/common/Pagination';
 const MyTicketsPage = () => {
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
+  const queryClient = useQueryClient();
   
   const currentPage = parseInt(searchParams.get('page') || '0', 10);
 
@@ -20,6 +21,11 @@ const MyTicketsPage = () => {
     keepPreviousData: true
   });
 
+  const cancelMutation = useMutation({
+    mutationFn: (bookingId) => bookingApi.cancelMyBooking(bookingId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['myTickets'] })
+  });
+
   const handlePageChange = (newPage) => {
     setSearchParams({ page: newPage });
   };
@@ -27,6 +33,16 @@ const MyTicketsPage = () => {
   const bookings = data?.content || [];
   const pageable = data?.pageable || { pageNumber: currentPage };
   const totalPages = data?.totalPages || 0;
+
+  const handleCancel = (booking) => {
+    const refundMessage = booking.paymentStatus === 'PAID'
+      ? ' Khoản thanh toán sẽ được ghi nhận hoàn tiền tự động trong chế độ mô phỏng.'
+      : ' Nếu giao dịch chưa thanh toán, giao dịch sẽ bị hủy và không phát sinh hoàn tiền.';
+
+    if (window.confirm(`Bạn có chắc muốn hủy vé ${booking.bookingCode}?${refundMessage}`)) {
+      cancelMutation.mutate(booking.id);
+    }
+  };
   
   const successMessage = location.state?.newBooking 
     ? 'Đặt vé thành công! Mã vé của bạn là: ' + location.state.newBooking.bookingCode 
@@ -64,9 +80,19 @@ const MyTicketsPage = () => {
           </div>
         ) : bookings.length > 0 ? (
           <>
+            {cancelMutation.isError && (
+              <div className="mb-5 rounded-md bg-red-50 p-4 text-sm text-red-700">
+                {cancelMutation.error?.response?.data?.message || 'Không thể hủy vé. Vui lòng thử lại.'}
+              </div>
+            )}
             <div className="space-y-6 mb-8">
-              {bookings.map(booking => (
-                <TicketCard key={booking.id} booking={booking} />
+              {bookings.map((booking) => (
+                <TicketCard
+                  key={booking.id}
+                  booking={booking}
+                  onCancel={handleCancel}
+                  cancelling={cancelMutation.isPending && cancelMutation.variables === booking.id}
+                />
               ))}
             </div>
             

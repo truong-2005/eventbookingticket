@@ -3,7 +3,6 @@ package com.eventbooking.eventbooking.controller;
 import com.eventbooking.eventbooking.config.VNPayConfig;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +17,6 @@ import java.util.Map;
 @Tag(name = "Mock VNPay", description = "Giả lập cổng thanh toán VNPay")
 @RestController
 @RequestMapping("/api/mock-vnpay")
-@RequiredArgsConstructor
 public class MockVNPayController {
 
     @Value("${vnpay.hashSecret}")

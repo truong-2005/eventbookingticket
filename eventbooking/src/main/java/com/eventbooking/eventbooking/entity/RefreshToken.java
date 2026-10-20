@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "refresh_tokens")
 @Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
 @Builder
 public class RefreshToken {
 
@@ -32,4 +31,16 @@ public class RefreshToken {
 
     @CreationTimestamp
     private LocalDateTime createdAt;
+
+    public RefreshToken() {
+    }
+
+    public RefreshToken(Long id, String token, User user, LocalDateTime expiryDate, boolean revoked, LocalDateTime createdAt) {
+        this.id = id;
+        this.token = token;
+        this.user = user;
+        this.expiryDate = expiryDate;
+        this.revoked = revoked;
+        this.createdAt = createdAt;
+    }
 }

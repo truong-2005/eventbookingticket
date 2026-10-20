@@ -9,7 +9,6 @@ import com.eventbooking.eventbooking.service.EmailService;
 import com.eventbooking.eventbooking.service.PasswordResetService;
 import com.eventbooking.eventbooking.util.DateTimeUtil;
 import com.eventbooking.eventbooking.util.ResetTokenGenerator;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,13 +17,19 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class PasswordResetServiceImpl implements PasswordResetService {
 
     private final PasswordResetTokenRepository tokenRepository;
     private final UserRepository userRepository;
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
+
+    public PasswordResetServiceImpl(PasswordResetTokenRepository tokenRepository, UserRepository userRepository, EmailService emailService, PasswordEncoder passwordEncoder) {
+        this.tokenRepository = tokenRepository;
+        this.userRepository = userRepository;
+        this.emailService = emailService;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Value("${app.password.base-url:http://localhost:3000/reset-password}")
     private String baseUrl;

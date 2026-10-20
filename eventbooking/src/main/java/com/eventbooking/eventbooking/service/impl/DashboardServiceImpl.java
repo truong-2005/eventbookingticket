@@ -7,7 +7,6 @@ import com.eventbooking.eventbooking.repository.EventRepository;
 import com.eventbooking.eventbooking.repository.UserRepository;
 import com.eventbooking.eventbooking.service.DashboardService;
 import com.eventbooking.eventbooking.util.DateTimeUtil;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,13 +16,18 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class DashboardServiceImpl implements DashboardService {
 
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
+
+    public DashboardServiceImpl(BookingRepository bookingRepository, UserRepository userRepository, EventRepository eventRepository) {
+        this.bookingRepository = bookingRepository;
+        this.userRepository = userRepository;
+        this.eventRepository = eventRepository;
+    }
 
     @Override
     public DashboardResponse getSummary() {

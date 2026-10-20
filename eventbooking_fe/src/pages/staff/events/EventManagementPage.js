@@ -21,7 +21,8 @@ const StaffEventListPage = () => {
       const res = await eventApi.getAllEvents({ page: currentPage, size: 10 });
       return res.data;
     },
-    keepPreviousData: true
+    keepPreviousData: true,
+    refetchInterval: 30_000
   });
 
   const deleteMutation = useMutation({

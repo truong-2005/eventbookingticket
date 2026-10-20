@@ -6,18 +6,21 @@ import com.eventbooking.eventbooking.exception.*;
 import com.eventbooking.eventbooking.mapper.RoleMapper;
 import com.eventbooking.eventbooking.repository.RoleRepository;
 import com.eventbooking.eventbooking.service.RoleService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class RoleServiceImpl implements RoleService {
 
     private final RoleRepository roleRepository;
     private final RoleMapper roleMapper;
+
+    public RoleServiceImpl(RoleRepository roleRepository, RoleMapper roleMapper) {
+        this.roleRepository = roleRepository;
+        this.roleMapper = roleMapper;
+    }
 
     @Override
     @Transactional

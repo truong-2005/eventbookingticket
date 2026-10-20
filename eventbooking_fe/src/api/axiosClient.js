@@ -33,6 +33,7 @@ axiosClient.interceptors.request.use(
 // ─── Response Interceptor (Token Refresh) ────────────────────────────────────
 let refreshPromise = null;  // dùng 1 promise duy nhất cho tất cả request bị 401 đồng thời
 
+// eslint-disable-next-line no-unused-vars
 const getLoginPath = () => {
   const path = window.location.pathname;
   if (path.startsWith('/admin')) return '/admin/login';

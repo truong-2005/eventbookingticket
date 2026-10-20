@@ -55,7 +55,8 @@ const EventListPage = () => {
       });
       return res.data;
     },
-    keepPreviousData: true
+    keepPreviousData: true,
+    refetchInterval: 30_000
   });
 
   const deleteMutation = useMutation({

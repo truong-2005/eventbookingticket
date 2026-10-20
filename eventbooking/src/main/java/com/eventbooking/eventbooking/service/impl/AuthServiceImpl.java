@@ -9,7 +9,6 @@ import com.eventbooking.eventbooking.repository.UserRepository;
 import com.eventbooking.eventbooking.security.CustomUserDetails;
 import com.eventbooking.eventbooking.security.JwtService;
 import com.eventbooking.eventbooking.service.*;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
@@ -28,6 +26,16 @@ public class AuthServiceImpl implements AuthService {
     private final RefreshTokenService refreshTokenService;
     private final PasswordResetService passwordResetService;
     private final UserMapper userMapper;
+
+    public AuthServiceImpl(UserRepository userRepository, RoleService roleService, PasswordEncoder passwordEncoder, JwtService jwtService, RefreshTokenService refreshTokenService, PasswordResetService passwordResetService, UserMapper userMapper) {
+        this.userRepository = userRepository;
+        this.roleService = roleService;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
+        this.refreshTokenService = refreshTokenService;
+        this.passwordResetService = passwordResetService;
+        this.userMapper = userMapper;
+    }
 
     @Value("${app.jwt.access-token-expiration-ms}")
     private long accessTokenExpirationMs;

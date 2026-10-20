@@ -11,6 +11,7 @@ export const ROUTES = {
   MY_BOOKING_DETAIL: '/my-tickets/:id',
   PROFILE: '/profile',
   CHANGE_PASSWORD: '/profile/change-password',
+  MOCK_VNPAY: '/mock-vnpay',
   PAYMENT_RETURN: '/payment-return',
 
   STAFF_LOGIN: '/staff/login',

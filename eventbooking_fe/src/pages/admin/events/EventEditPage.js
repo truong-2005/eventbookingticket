@@ -7,6 +7,7 @@ import EventForm from '../../../components/events/EventForm';
 import Button from '../../../components/common/Button';
 import { ROUTES } from '../../../constants/routes';
 import { format } from 'date-fns';
+import { getEventStatusForSchedule } from '../../../utils/eventStatus';
 
 const AdminEventEditPage = () => {
   const { id } = useParams();
@@ -47,7 +48,7 @@ const AdminEventEditPage = () => {
       ticketPrice: parseFloat(formData.price),
       totalTickets: parseInt(formData.totalTickets),
       categoryId: parseInt(formData.categoryId),
-      status: formData.status,
+      status: getEventStatusForSchedule(formData.startTime, formData.endTime, data?.event?.status),
       imageUrl: formData.imageUrl
     };
     updateMutation.mutate(payload);
@@ -85,7 +86,6 @@ const AdminEventEditPage = () => {
         isLoading={updateMutation.isPending} 
         categories={categories}
         submitText="Lưu thay đổi"
-        isEdit={true}
       />
     </div>
   );

@@ -4,7 +4,6 @@ import com.eventbooking.eventbooking.dto.dashboard.*;
 import com.eventbooking.eventbooking.service.DashboardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -14,11 +13,14 @@ import java.util.List;
 @Tag(name = "Dashboard", description = "Thống kê doanh thu (chỉ ADMIN)")
 @RestController
 @RequestMapping("/api/dashboard")
-@PreAuthorize("hasRole('ADMIN')")
-@RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
 public class DashboardController {
 
     private final DashboardService dashboardService;
+
+    public DashboardController(DashboardService dashboardService) {
+        this.dashboardService = dashboardService;
+    }
 
     @Operation(summary = "Tổng quan: doanh thu, vé bán, đơn, user, sự kiện")
     @GetMapping("/summary")

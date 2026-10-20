@@ -15,7 +15,8 @@ const EventDetailPage = () => {
     queryFn: async () => {
       const res = await eventApi.getEventById(id);
       return res.data;
-    }
+    },
+    refetchInterval: 30_000
   });
 
   if (isLoading) return <div className="text-center p-10">Đang tải chi tiết sự kiện...</div>;

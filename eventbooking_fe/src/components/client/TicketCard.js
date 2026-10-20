@@ -4,10 +4,15 @@ import { formatDate } from '../../utils/formatDate';
 import { Link } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
 
-const TicketCard = ({ booking }) => {
-  const isPaid = booking.paymentStatus === 'PAID' || booking.paymentMethod === 'CASH';
-  const isPending = booking.paymentStatus === 'PENDING' && booking.paymentMethod !== 'CASH';
+const TicketCard = ({ booking, onCancel, cancelling = false }) => {
   const isCancelled = booking.status === 'CANCELLED';
+  const isPaymentFailed = booking.paymentStatus === 'FAILED';
+  const isPaid = !isCancelled && !isPaymentFailed && (booking.paymentStatus === 'PAID' || booking.paymentMethod === 'CASH');
+  const isPending = !isCancelled && !isPaymentFailed && booking.paymentStatus === 'PENDING' && booking.paymentMethod !== 'CASH';
+  const isRefunded = booking.paymentStatus === 'REFUNDED';
+  const eventStartTime = booking.eventDate || booking.eventStartTime;
+  const canCancel = booking.status === 'CONFIRMED' && !isPaymentFailed
+    && (!eventStartTime || new Date(eventStartTime) > new Date());
 
   return (
     <div className="bg-white rounded-xl shadow border border-gray-100 overflow-hidden flex flex-col md:flex-row">
@@ -20,7 +25,7 @@ const TicketCard = ({ booking }) => {
             isPending ? 'bg-yellow-100 text-yellow-800' :
             'bg-red-100 text-red-800'
           }`}>
-            {isPaid ? 'ĐÃ THANH TOÁN' : isPending ? 'CHỜ THANH TOÁN' : 'ĐÃ HỦY'}
+            {isCancelled ? 'ĐÃ HỦY' : isPaymentFailed ? 'THANH TOÁN THẤT BẠI' : isPaid ? 'ĐÃ THANH TOÁN' : isPending ? 'CHỜ THANH TOÁN' : 'CHƯA THANH TOÁN'}
           </span>
         </div>
         
@@ -33,7 +38,7 @@ const TicketCard = ({ booking }) => {
             <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
-            {formatDate(booking.eventStartTime)}
+            {formatDate(booking.eventDate || booking.eventStartTime)}
           </div>
           <div className="flex items-start">
             <svg className="w-4 h-4 mr-2 text-gray-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -54,11 +59,11 @@ const TicketCard = ({ booking }) => {
           </div>
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm text-gray-500">Tổng tiền:</span>
-            <span className="text-lg font-bold text-blue-600">{formatCurrency(booking.totalPrice)}</span>
+            <span className="text-lg font-bold text-blue-600">{formatCurrency(booking.totalAmount ?? booking.totalPrice)}</span>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-sm text-gray-500">Ngày đặt:</span>
-            <span className="text-sm font-medium text-gray-900">{formatDate(booking.bookingDate)}</span>
+            <span className="text-sm font-medium text-gray-900">{formatDate(booking.createdAt || booking.bookingDate)}</span>
           </div>
         </div>
         
@@ -66,10 +71,23 @@ const TicketCard = ({ booking }) => {
           <Link to={`/events/${booking.eventId}`} className="text-sm font-medium text-blue-600 hover:text-blue-500">
             Xem lại sự kiện &rarr;
           </Link>
+          {canCancel && onCancel && (
+            <button
+              type="button"
+              onClick={() => onCancel(booking)}
+              disabled={cancelling}
+              className="mt-3 block w-full rounded-md border border-red-200 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {cancelling ? 'Đang hủy...' : 'Hủy vé'}
+            </button>
+          )}
+          {isCancelled && isRefunded && (
+            <p className="mt-2 text-xs text-blue-700">Hoàn tiền đã được ghi nhận (mô phỏng).</p>
+          )}
         </div>
       </div>
       {/* QR Code */}
-      {booking.bookingCode && !isCancelled && (
+      {booking.bookingCode && !isCancelled && !isPaymentFailed && (
         <div className="hidden md:flex flex-col justify-center items-center p-5 border-l border-gray-100 bg-white min-w-[150px]">
           <QRCodeSVG value={booking.bookingCode} size={100} />
           <span className="text-xs text-gray-400 mt-2 text-center">Quét mã<br/>để check-in</span>

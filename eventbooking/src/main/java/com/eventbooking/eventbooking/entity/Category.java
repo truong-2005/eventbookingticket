@@ -6,7 +6,6 @@ import lombok.*;
 @Entity
 @Table(name = "categories")
 @Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
 @Builder
 public class Category {
 
@@ -18,4 +17,13 @@ public class Category {
     private String name;            // Âm nhạc, Thể thao, Hội thảo...
 
     private String description;
+
+    public Category() {
+    }
+
+    public Category(Long id, String name, String description) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+    }
 }
