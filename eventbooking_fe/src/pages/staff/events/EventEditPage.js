@@ -31,6 +31,8 @@ const StaffEventEditPage = () => {
   const updateMutation = useMutation({
     mutationFn: (payload) => eventApi.updateEvent(id, payload),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['events'] });
+      queryClient.invalidateQueries({ queryKey: ['event', id] });
       queryClient.invalidateQueries({ queryKey: ['staffEvents'] });
       queryClient.invalidateQueries({ queryKey: ['staffEventEdit', id] });
       navigate(ROUTES.STAFF_EVENTS);

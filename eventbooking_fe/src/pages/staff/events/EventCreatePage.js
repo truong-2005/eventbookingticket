@@ -23,6 +23,7 @@ const StaffEventCreatePage = () => {
   const createMutation = useMutation({
     mutationFn: (payload) => eventApi.createEvent(payload),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['events'] });
       queryClient.invalidateQueries({ queryKey: ['staffEvents'] });
       navigate(ROUTES.STAFF_EVENTS);
     }
